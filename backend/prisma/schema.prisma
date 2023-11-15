@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgres://aman:ls@localhost:5432/test"
+}
+
+// model ID = twilio sid
+
+model User {
+  id        String         @id
+  username  String         @unique
+  password  String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  identity  String         @unique
+  Proof     Proof[]
+  sender    Conversation[] @relation(name: "sender")
+  recipient Conversation[] @relation(name: "recipient")
+}
+
+model Conversation {
+  id           String   @id @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  sender       User     @relation("sender", fields: [senderId], references: [id])
+  senderId     String
+  recipient    User     @relation("recipient", fields: [recipientId], references: [id])
+  recipientId  String
+  uniqueName   String   @unique
+  friendlyName String
+  Proof        Proof[]
+}
+
+model Proof {
+  id                       String       @id @default(uuid())
+  user                     User         @relation(fields: [userId], references: [id])
+  userId                   String
+  conversation             Conversation @relation(fields: [conversationId], references: [id])
+  conversationId           String
+  chainId                  Int
+  context                  String
+  epoch                    Int
+  extractedParameterValues String
+  identifier               String
+  onChainClaimId           String
+  ownerPublicKey           String
+  parameters               String
+  provider                 String
+  redactedParameters       String
+  sessionId                String?
+  signatures               String[]
+  templateClaimId          String
+  timestampS               String
+  witnessAddresses         String[]
+}
